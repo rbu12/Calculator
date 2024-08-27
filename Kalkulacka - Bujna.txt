@@ -1,0 +1,69 @@
+Ide o vytvorenie MFC dialogovej aplikacie Kalkulacka (sluzi na precvicenie prace s MFC, C++, OpenCV)
+
+Etapa 1
+
+- Vytvorte kalkulacku ktora bude vediet operacie (+-*/) ... 
+	ak chcete mozte pridat aj dalsie matematicke operacie
+
+- Aplikacia bude mat graficke rozhranie (bude obsahovat buttony s operaciami,
+	editbox na vpisovanie dat (zapises cislo a na stlacenie operacie sa toto cislo zapameta a
+	vynuluje sa editbox), osobitny edibox len na vypisovanie vysledkov(nastavit ho ako readonly))
+
+- Combobox ktory bude urcovat presnost vypoctov (int, double)
+
+- Operacie spolu s vysledkami sa budu zapisovat do suboru (log.txt)-(pri uskutocneni vypoctu)
+
+- Pridajte checkbox - ak bude zakliknuty tak sa bude operacia zapisovat do logu
+	(ak bude vypnuty nezapise sa nic)
+
+Etapa 2
+
+- Pridajte tlacidlo ktore na kliknutie otvori novy modalny dialog. 
+	V dialogu bude editbox ktory bude readonly a tlacidlo. 
+	Tlacidlo na kliknutie otvori CFileDialog na vyber cesty pre ukladanie logu.
+	Po vybrati cesty sa na OK zapise cesta do editboxu. 
+
+- V dialogu bude dalsi editbox do ktoreho sa bude zadavat meno suboru pre log file.
+	Ak uz takyto subor existuje Log sa bude pisat do tohto suboru.
+	Ak neexistuje vytvori sa novy subor s danym nazvom a bude sa zapisovat tam.
+
+- Pridat timestamp do logu v tvare - (year-month-day hour:minute:second)
+
+Etapa 3
+
+- pridat do aplikacie picker na datum a cas
+
+- k pickeru pridajte radiobuttony - disabled/enabled
+
+- ak je radiobutton nastaveny na enabled, tak sa pri logovani pouzije hodnota z pickera
+
+- ak je radiobutton nastaveny na disabled, tak sa picker zablokuje (readonly) a loguje sa systemovy cas
+
+- pridajte slider ktorym sa bude nastavovat presnost (pocet desatinnych miest pri vypocte) (0-10)
+
+Etapa 4 - je potrebne mat rozbehane OpenCV a napojene na projekt
+
+- Načítaj z disku obrazok(imread) a zobraz ho(imshow) (pomocou OpenCV)
+
+- Po kliknuti na vypocitat vytvorime obrazok v opencv kde bude cierne
+	pozadia a velkym napisany vysledok Modrym - tento obrazok zobraz cez opencv
+
+Etapa 5
+
+- Pridat kontrolky - jedna na vyber farieb pre pozadie na obrazku a druha na farbu textu
+
+Etapa 6
+
+- Vytvoreny obrazok uloz na disk. Pred ulozenim z obrazku vytvor binarny obrazok
+	pomcou operacie in range. Nasledne na obrazku invertuj farby pomocou spravneho
+	pouzitia binarneho threshold a aplikuj na obrazok median blur (3), eroziu (3), dilaciu (3)
+
+Etapa 7
+
+- Zisti aku farbu ma pixel na pozicii X,Y pre ciernobiely aj farebny obrazok
+	a tieto udaje vypis v aplikacii (X, Y nech sa zadava v aplikacii cez editboxy).
+
+Etapa 8
+
+- Otvorte kameru a zobrazujte v novom okne obrazky. Pridajte editbox v ktorom sa
+	bude definovat ktory obrazok v poradi sa bude ukladat na disk. 
