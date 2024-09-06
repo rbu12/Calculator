@@ -5,7 +5,7 @@
 
 #include "globals.h"
 
-class EditInput : public CEdit
+class EditInput : public CBCGPEdit
 {
 	DECLARE_DYNAMIC(EditInput)
 

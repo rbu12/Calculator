@@ -14,8 +14,8 @@
 
 // CCalculatorApp
 
-BEGIN_MESSAGE_MAP(CCalculatorApp, CWinApp)
-	ON_COMMAND(ID_HELP, &CWinApp::OnHelp)
+BEGIN_MESSAGE_MAP(CCalculatorApp, CBCGPWinApp)
+	ON_COMMAND(ID_HELP, &CBCGPWinApp::OnHelp)
 END_MESSAGE_MAP()
 
 
@@ -50,7 +50,7 @@ BOOL CCalculatorApp::InitInstance()
 	InitCtrls.dwICC = ICC_WIN95_CLASSES;
 	InitCommonControlsEx(&InitCtrls);
 
-	CWinApp::InitInstance();
+	CBCGPWinApp::InitInstance();
 
 
 	AfxEnableControlContainer();

@@ -1,6 +1,7 @@
 #pragma once
 
-#include <opencv2/core/cvstd.hpp>
+#include <opencv_all.h>
+#include <atomic>
 
 // global variables
 // and all the initial constatns to avoid magic numbers
@@ -36,7 +37,6 @@ namespace globals
 
     // openCV stages
     const cv::String STRING_WINDOW_NAME("Calculator");
-    const cv::String STRING_IMAGE_NAME_JOB("job.jpg");
+    const cv::String STRING_IMAGE_NAME_JOB("DPS.jpg");
     const cv::String STRING_IMAGE_NAME_CALCULATOR("Calculator.jpg");
-
 }

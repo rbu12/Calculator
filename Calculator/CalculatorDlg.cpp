@@ -14,36 +14,92 @@
 #include <exception>
 #include <cmath>
 
+#include <BCGPDateTimeCtrl.h>
+#include <comdef.h>
+
+#include <opencv_all.h>
+
+
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
 
+std::atomic<bool> CCalculatorDlg::m_flagCameraClose = false;
+
+
+
 // CCalculatorDlg dialog
 
-
-
 CCalculatorDlg::CCalculatorDlg(CWnd* pParent /*=nullptr*/)
-	: CDialogEx(IDD_CALCULATOR_DIALOG, pParent)
+	: CBCGPDialog(IDD_CALCULATOR_DIALOG, pParent)
     , m_check_log(globals::CHECKBOX_LOG_FALSE)
     , m_radio_group_log_time(globals::RADIO_GROUP_LOG_TIME_DISABLE)
+    , v_editPosX(0)
+    , v_cameraFrameNum(0)
 {
-    // Stage 4.1 (show picture)
-    cv::Mat img = cv::imread(globals::STRING_IMAGE_NAME_JOB);
-    cv::namedWindow(globals::STRING_WINDOW_NAME, cv::WINDOW_AUTOSIZE);
-    cv::imshow(globals::STRING_WINDOW_NAME, img);
-    cv::moveWindow(globals::STRING_WINDOW_NAME, 30, 100);
+    //// Stage 4.1 (show picture)
+    //cv::Mat image = cv::imread(globals::STRING_IMAGE_NAME_JOB);
+    ////cv::namedWindow(globals::STRING_IMAGE_NAME_JOB, cv::WINDOW_AUTOSIZE);
+    //cv::imshow(globals::STRING_IMAGE_NAME_JOB, image);
+    //cv::moveWindow(globals::STRING_IMAGE_NAME_JOB, 30, 100);
+    //
+    //cv::Mat imageBinary;
+    //cv::Scalar lowerBound(100, 100, 100);
+    //cv::Scalar upperBound(255, 255, 255);
+    //cv::inRange(image, lowerBound, upperBound, imageBinary);
+    //cv::imshow("imageBinary.jpg", imageBinary);
+    //
+    //// Apply binary threshold
+    //cv::Mat imageThreshold;
+    //cv::threshold(imageBinary, imageThreshold, 128, 255, cv::THRESH_BINARY_INV);
+    //cv::imshow("imageThreshold.jpg", imageThreshold);
+    //
+    //// Invert the binary image
+    //cv::Mat imageInverted;
+    //cv::bitwise_not(imageBinary, imageInverted);
+    //cv::imshow("imageInverted.jpg", imageInverted);
+    //
+    //// Apply medianBlur
+    //cv::Mat imageMedianBlured;
+    //cv::medianBlur(imageInverted, imageMedianBlured, 3);
+    //cv::imshow("imageMedianBlured.jpg", imageMedianBlured);
+    //
+    //int kernelSize = 3;
+    //cv::Mat kernel = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(kernelSize, kernelSize));
+    //
+    //// Apply erosion
+    //cv::Mat imageEroded;
+    //cv::erode(imageMedianBlured, imageEroded, kernel);
+    //cv::imshow("imageEroded.jpg", imageEroded);
+    //
+    //// Apply dilation
+    //cv::Mat imageDilated;
+    //cv::erode(imageEroded, imageDilated, kernel);
+    //cv::imshow("imageDilated.jpg", imageDilated);
+    //
+    //// Run Camera
+    //m_cameraThread = std::thread(CameraCapture(&cameraFrameNum));
+
+    // RESIZING
+    EnableLayout();
 }
 
 CCalculatorDlg::~CCalculatorDlg()
 {
-    cv::destroyAllWindows();
+
+//    g_flagCameraClose = true;
+//    
+//    if(m_cameraThread.joinable())
+//        m_cameraThread.join();
+//
+//    cv::destroyAllWindows();
 }
 
 void CCalculatorDlg::DoDataExchange(CDataExchange* pDX)
 {
-    CDialogEx::DoDataExchange(pDX);
+    CBCGPDialog::DoDataExchange(pDX);
     DDX_Control(pDX, IDC_EDIT_INPUT, m_edit_input);
     DDX_Text(pDX, IDC_EDIT_RESULT, m_edit_result);
     DDX_Control(pDX, IDC_COMBO_PRECISION, m_combobox_precision);
@@ -51,9 +107,15 @@ void CCalculatorDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Radio(pDX, IDC_RADIO_LOG_TIME_DISABLE, m_radio_group_log_time);
     DDX_Control(pDX, IDC_DATETIMEPICKER_LOG, m_dt_picker_log);
     DDX_Control(pDX, IDC_SLIDER_PRECISION, m_slider_precision);
+    DDX_Control(pDX, IDC_MFCCOLORBUTTON_BACKGROUND, c_colorButtonBackground);
+    DDX_Control(pDX, IDC_MFCCOLORBUTTON_TEXT, c_colorButtonText);
+    DDX_Control(pDX, IDC_STATIC_IMAGEVIEWER_JOB, c_imageViewerJob);
+    DDX_Text(pDX, IDC_EDIT_POS_X, v_editPosX);
+    DDX_Text(pDX, IDC_EDIT_POS_Y, v_editPosY);
+    DDX_Text(pDX, IDC_EDIT_CAMERA_FRAME, v_cameraFrameNum);
 }
 
-BEGIN_MESSAGE_MAP(CCalculatorDlg, CDialogEx)
+BEGIN_MESSAGE_MAP(CCalculatorDlg, CBCGPDialog)
 	ON_WM_QUERYDRAGICON()
     ON_BN_CLICKED(IDC_BUTTON_PLUS, &CCalculatorDlg::OnBnClickedButtonOperationPlus)
     ON_BN_CLICKED(IDC_BUTTON_MINUS, &CCalculatorDlg::OnBnClickedButtonOperationMinus)
@@ -65,6 +127,7 @@ BEGIN_MESSAGE_MAP(CCalculatorDlg, CDialogEx)
     ON_BN_CLICKED(IDC_RADIO_LOG_TIME_DISABLE, &CCalculatorDlg::OnBnClickedRadioLogTimeDisable)
     ON_BN_CLICKED(IDC_RADIO_LOG_TIME_ENABLE, &CCalculatorDlg::OnBnClickedRadioLogTimeEnable)
     ON_CBN_SELCHANGE(IDC_COMBO_PRECISION, &CCalculatorDlg::OnCbnSelchangeComboPrecision)
+    ON_BN_CLICKED(IDC_BUTTON_SAVE_IMAGES, &CCalculatorDlg::OnBnClickedButtonSaveImages)
 END_MESSAGE_MAP()
 
 
@@ -72,7 +135,7 @@ END_MESSAGE_MAP()
 
 BOOL CCalculatorDlg::OnInitDialog()
 {
-    CDialogEx::OnInitDialog();
+    CBCGPDialog::OnInitDialog();
 
     // Init m_combobox_precision
     m_combobox_precision.AddString(globals::STRING_PRECISION_INT);
@@ -94,6 +157,48 @@ BOOL CCalculatorDlg::OnInitDialog()
     // Init m_slider_precision
     m_slider_precision.SetRange(0, 10);
     m_slider_precision.EnableWindow(m_combobox_precision.GetCurSel());
+
+    // Init ColorButtons
+    c_colorButtonBackground.SetColor(RGB(0,0,0));
+    c_colorButtonText.SetColor(RGB(0,0,255));
+
+    // RESIZING
+    CBCGPStaticLayout* pLayout = (CBCGPStaticLayout*)GetLayout();
+
+    if (pLayout != NULL)
+    {
+        if (m_edit_input)
+            pLayout->AddAnchor(m_edit_input.GetSafeHwnd(),         CBCGPStaticLayout::e_MoveTypeVert, CBCGPStaticLayout::e_SizeTypeBoth, CPoint(100, 50), CPoint(100, 50) );
+        if (m_combobox_precision)
+            pLayout->AddAnchor(m_combobox_precision.GetSafeHwnd(), CBCGPStaticLayout::e_MoveTypeHorz, CBCGPStaticLayout::e_SizeTypeNone);
+        if (m_slider_precision)
+            pLayout->AddAnchor(m_slider_precision.GetSafeHwnd(),   CBCGPStaticLayout::e_MoveTypeHorz, CBCGPStaticLayout::e_SizeTypeHorz, CPoint(100, 100), CPoint(0, 100));
+        if (c_colorButtonBackground)
+            pLayout->AddAnchor(c_colorButtonBackground.GetSafeHwnd(), CBCGPStaticLayout::e_MoveTypeBoth, CBCGPStaticLayout::e_SizeTypeNone);
+        if (c_colorButtonText)
+            pLayout->AddAnchor(c_colorButtonText.GetSafeHwnd(), CBCGPStaticLayout::e_MoveTypeBoth, CBCGPStaticLayout::e_SizeTypeNone);
+        if (c_imageViewerJob)
+            pLayout->AddAnchor(c_imageViewerJob.GetSafeHwnd(), CBCGPStaticLayout::e_MoveTypeBoth, CBCGPStaticLayout::e_SizeTypeNone);
+
+        pLayout->AddAnchor(IDC_EDIT_RESULT,            CBCGPStaticLayout::e_MoveTypeNone, CBCGPStaticLayout::e_SizeTypeBoth, CPoint(100, 100), CPoint(100, 50));
+        pLayout->AddAnchor(IDC_BUTTON_PLUS,            CBCGPStaticLayout::e_MoveTypeVert, CBCGPStaticLayout::e_SizeTypeNone);
+        pLayout->AddAnchor(IDC_BUTTON_MINUS,           CBCGPStaticLayout::e_MoveTypeVert, CBCGPStaticLayout::e_SizeTypeNone);
+        pLayout->AddAnchor(IDC_BUTTON_MULTIPLY,        CBCGPStaticLayout::e_MoveTypeVert, CBCGPStaticLayout::e_SizeTypeNone);
+        pLayout->AddAnchor(IDC_BUTTON_DIVIDE,          CBCGPStaticLayout::e_MoveTypeVert, CBCGPStaticLayout::e_SizeTypeNone);
+        pLayout->AddAnchor(IDC_BUTTON_EQUALS,          CBCGPStaticLayout::e_MoveTypeBoth, CBCGPStaticLayout::e_SizeTypeNone);
+        pLayout->AddAnchor(IDC_BUTTON_LOG_FILE_CHANGE, CBCGPStaticLayout::e_MoveTypeBoth, CBCGPStaticLayout::e_SizeTypeNone);
+        pLayout->AddAnchor(IDC_CHECK_LOG,              CBCGPStaticLayout::e_MoveTypeBoth, CBCGPStaticLayout::e_SizeTypeNone);
+        pLayout->AddAnchor(IDC_STATIC_GROUP_TIME_LOG,  CBCGPStaticLayout::e_MoveTypeBoth, CBCGPStaticLayout::e_SizeTypeNone);
+        pLayout->AddAnchor(IDC_DATETIMEPICKER_LOG,     CBCGPStaticLayout::e_MoveTypeBoth, CBCGPStaticLayout::e_SizeTypeNone);
+        pLayout->AddAnchor(IDC_RADIO_LOG_TIME_DISABLE, CBCGPStaticLayout::e_MoveTypeBoth, CBCGPStaticLayout::e_SizeTypeNone);
+        pLayout->AddAnchor(IDC_RADIO_LOG_TIME_ENABLE,  CBCGPStaticLayout::e_MoveTypeBoth, CBCGPStaticLayout::e_SizeTypeNone);
+        pLayout->AddAnchor(IDC_STATIC_BACKGROUND,      CBCGPStaticLayout::e_MoveTypeBoth, CBCGPStaticLayout::e_SizeTypeNone);
+        pLayout->AddAnchor(IDC_STATIC_TEXT,            CBCGPStaticLayout::e_MoveTypeBoth, CBCGPStaticLayout::e_SizeTypeNone);
+    }
+
+    // Stage 6.5 (show picture using CBCGPKImageViewer)
+    cv::Mat imageForImageViewer = cv::imread("job.jpg");
+    c_imageViewerJob.SetImage(imageForImageViewer);
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -242,6 +347,54 @@ void CCalculatorDlg::OnBnClickedButtonEquals()
         WriteToLog(str_to_write_to_file);
     }
 
+    // Stage 4.2
+    static int imageCount = 1;
+    const cv::String name("result");
+    const cv::String extension(".jpg");
+    const cv::String imageName = name + std::to_string(imageCount) + extension;
+    imageCount++;
+    cv::Mat image = cv::Mat::zeros(640, 1280, CV_8UC3); // 8-bit, 3-channel (color)
+    
+    // read result from m_edit_result (it was filled already)
+    std::string strResult = CT2A(LPCWSTR(m_edit_result));
+    
+    // TODO: fix scaling with number of chars in result string
+    cv::Size imageSize = image.size();
+    COLORREF colorBackground = c_colorButtonBackground.GetColor();
+    COLORREF colorText = c_colorButtonText.GetColor();
+    image.setTo(cv::Scalar(GetBValue(colorBackground), GetGValue(colorBackground), GetRValue(colorBackground)));
+    cv::putText(image, strResult, cv::Point(imageSize.width/4, imageSize.height/2), cv::FONT_HERSHEY_SIMPLEX, 3.0,
+        cv::Scalar(GetBValue(colorText), GetGValue(colorText), GetRValue(colorText)), 20);
+
+    cv::imshow(imageName, image);
+    
+    // Create binary image
+    cv::Mat imageBinary;
+    //cv::Scalar lowerBound(0, 0, 0);
+    //cv::Scalar upperBound(200, 200, 200);
+    cv::Scalar lowerBound(100, 100, 100);
+    cv::Scalar upperBound(255, 255, 255);
+    cv::inRange(image, lowerBound, upperBound, imageBinary);
+    cv::imshow("imageBinary", imageBinary);
+    
+    
+    // save image to a file
+    cv::imwrite(imageName, image);
+
+    // Stage 7 (read image pixel color)
+    if (v_editPosX >= imageSize.width || v_editPosY >= imageSize.height)
+    {
+        AfxMessageBox(_T("Invalid coordinate !"));
+    }
+    else
+    {
+        uchar pixelColorBinary = imageBinary.at<uchar>(cv::Point(v_editPosX, v_editPosY));
+        cv::Vec3b pixelColorColored = image.at<cv::Vec3b>(cv::Point(v_editPosX, v_editPosY));
+
+        TRACE("BIN: %d, RGB: %d,%d,%d\n", pixelColorBinary, pixelColorColored[2],
+                                                            pixelColorColored[1],
+                                                            pixelColorColored[0]);
+    }
     // Cleanup
     UpdateData(0);
     m_input1 = 0;
@@ -332,21 +485,35 @@ void CCalculatorDlg::CreateStringForLog(CString& out_string
         out_string += tmp_string;
     }
 
+    out_string += " | ";
+
     // Add timestamp to log
-    CTime date_time_ctrl;
+    DATE date;
+
     if (m_radio_group_log_time == globals::RADIO_GROUP_LOG_TIME_ENABLE)
     {
         // Use date time picker
-        m_dt_picker_log.GetTime(date_time_ctrl);
+        date = m_dt_picker_log.GetDate();
+        COleDateTime oleDateTime(date);
+        out_string += oleDateTime.Format(_T("%Y-%m-%d %H:%M:%S\n"));
     }
     else
     {
-        // Use system time
-        date_time_ctrl = CTime::GetCurrentTime();
-    }
+        // Use system date/time
+        SYSTEMTIME system_time;
+        GetLocalTime(&system_time);
+        
+        CString tmp_string;
+        tmp_string.Format(_T("%04d-%02d-%02d %02d:%02d:%02d\n"),
+            system_time.wYear,
+            system_time.wMonth,
+            system_time.wDay,
+            system_time.wHour,
+            system_time.wMinute,
+            system_time.wSecond);
 
-    out_string += " / ";
-    out_string += date_time_ctrl.Format(_T("%Y-%m-%d %H:%M:%S\n"));
+        out_string += tmp_string;
+    }
 }
 
 void CCalculatorDlg::WriteToLog(const CString& in_string)
@@ -357,17 +524,24 @@ void CCalculatorDlg::WriteToLog(const CString& in_string)
 
 void CCalculatorDlg::OnDestroy()
 {
-    CDialogEx::OnDestroy();
+    CBCGPDialog::OnDestroy();
 
     if (m_file_log != CFile::hFileNull)
         m_file_log.Close();
+
+    m_flagCameraClose = true;
+
+    if (m_cameraThread.joinable())
+        m_cameraThread.join();
+
+    cv::destroyAllWindows();
 }
 
 void CCalculatorDlg::OnBnClickedButtonLogFileChange()
 {
     LogDlg dlg(this);
 
-    int response = dlg.DoModal();
+    INT_PTR response = dlg.DoModal();
 
     if (response == IDOK)
     {
@@ -455,8 +629,11 @@ void CCalculatorDlg::OnCbnSelchangeComboPrecision()
     if (selected_item_index != CB_ERR)
     {
         m_combobox_precision.GetLBText(selected_item_index, selected_item_text);
+        
+       // m_combobox_precision.SetItemData(0, E_INT)
     }
 
+    // if (m_combobox_precision.GetItemData(selected_item_index == E_INT);
     if (selected_item_text == globals::STRING_PRECISION_INT)
     {
         m_slider_precision.EnableWindow(false);
@@ -465,4 +642,55 @@ void CCalculatorDlg::OnCbnSelchangeComboPrecision()
     {
         m_slider_precision.EnableWindow(true);
     }
+}
+
+CCalculatorDlg::CameraCapture::CameraCapture(int* ptr) 
+    : p_cameraFrameNum(ptr)
+{
+}
+
+void CCalculatorDlg::CameraCapture::operator()() const
+{
+    cv::VideoCapture camera(0);
+    if (camera.isOpened())
+    {
+        cv::Mat frame;
+        int counter = 0;
+        int imageCount = 1;
+        while (!m_flagCameraClose)
+        {
+            camera >> frame;
+            if (frame.empty())
+            {
+                //break;
+            }
+            else
+            {
+                cv::imshow("Camera Capture", frame);
+                if (*p_cameraFrameNum > 0)
+                {
+                    if( ( counter = ( counter % *p_cameraFrameNum ) ) == 0 )
+                    {
+                        const cv::String name("CameraImages\\CameraImage");
+                        const cv::String extension(".jpg");
+                        const cv::String imageName = name + std::to_string(imageCount) + extension;
+                        cv::imwrite(imageName, frame);
+                        imageCount++;
+                    }   
+                    counter++;
+                }
+            }
+
+            if (cv::waitKey(10) >= 0)
+                m_flagCameraClose = true;
+        }
+    }
+    camera.release();
+}
+
+
+void CCalculatorDlg::OnBnClickedButtonSaveImages()
+{
+    UpdateData();
+    cameraFrameNum = v_cameraFrameNum;
 }

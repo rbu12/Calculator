@@ -8,7 +8,7 @@
 
 // EditInput
 
-IMPLEMENT_DYNAMIC(EditInput, CEdit)
+IMPLEMENT_DYNAMIC(EditInput, CBCGPEdit)
 
 EditInput::EditInput()
 //    : CEdit::CEdit()  //Called automatically
@@ -21,7 +21,7 @@ EditInput::~EditInput()
 }
 
 
-BEGIN_MESSAGE_MAP(EditInput, CEdit)
+BEGIN_MESSAGE_MAP(EditInput, CBCGPEdit)
     ON_WM_CHAR()
 END_MESSAGE_MAP()
 
@@ -62,7 +62,7 @@ void EditInput::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
             AfxMessageBox(_T("Invalid Input: Negative sign !"));
         }
         else
-            CEdit::OnChar(nChar, nRepCnt, nFlags);
+            CBCGPEdit::OnChar(nChar, nRepCnt, nFlags);
     }
     else
     {

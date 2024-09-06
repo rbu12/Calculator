@@ -3,9 +3,10 @@
 
 #include "CalculatorDlg.h"
 
+
 // LogDlg dialog
 
-class LogDlg : public CDialogEx
+class LogDlg : public CBCGPDialog
 {
 	DECLARE_DYNAMIC(LogDlg)
 
@@ -38,4 +39,8 @@ private:
 
 public:
     void GetFullFilepath(CString& out_string) const;
+
+private:
+	// BCGP ChartView
+	CBCGPChartCtrl c_chartCTRL;
 };

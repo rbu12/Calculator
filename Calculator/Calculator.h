@@ -9,13 +9,14 @@
 #endif
 
 #include "resource.h"		// main symbols
-
+#include <BCGCBProInc.h>			// BCGPro Control Bar
+#include <BCGCBPro.h>
 
 // CCalculatorApp:
 // See Calculator.cpp for the implementation of this class
 //
 
-class CCalculatorApp : public CWinApp
+class CCalculatorApp : public CBCGPWinApp
 {
 public:
 	CCalculatorApp();

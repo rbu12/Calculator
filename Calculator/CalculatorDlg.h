@@ -7,14 +7,14 @@
 #include "Helpers.h"
 #include "EditInput.h"
 
-//openCV
-#include <opencv2/core.hpp>
-#include <opencv2/imgcodecs.hpp>
-#include <opencv2/highgui.hpp>
-#include <opencv2/opencv.hpp>
+#include <KEL2017/IP.h>
+
+#include <thread>
+
+
 
 // CCalculatorDlg dialog
-class CCalculatorDlg : public CDialogEx
+class CCalculatorDlg : public CBCGPDialog
 {
 // Construction
 public:
@@ -43,13 +43,26 @@ protected:
 private:
     EditInput m_edit_input;
     CString m_edit_result;
-    CComboBox m_combobox_precision;
-    CDateTimeCtrl m_dt_picker_log;
-    CSliderCtrl m_slider_precision;
+    CBCGPComboBox m_combobox_precision;
+    CBCGPDateTimeCtrl m_dt_picker_log;
+    CBCGPSliderCtrl m_slider_precision;
+    CBCGPColorButton c_colorButtonBackground;
+    CBCGPColorButton c_colorButtonText;
 
+
+    
+    // KEL ImageViewer
+    CBCGPKImageViewer c_imageViewerJob;
+
+
+    
     // private value variables
     BOOL m_check_log;
     int m_radio_group_log_time;
+    int v_editPosX;
+    int v_editPosY;
+    int v_cameraFrameNum;
+    int cameraFrameNum;
 
     // private member variables
 private:
@@ -59,6 +72,8 @@ private:
     CFile m_file_log;
 
     globals::MATHEMATICAL_OPERATION m_mathematical_operation;
+
+    static std::atomic<bool> m_flagCameraClose;
 
     //private handlers
 private:
@@ -89,4 +104,18 @@ public:
     void ChangeLogFile(const CString& in_string_filepath);
     bool OpenLogFile(const CString& in_string_filepath);
 
+    // camera stuff
+private:
+    struct CameraCapture
+    {
+        int* p_cameraFrameNum;
+        
+        CameraCapture(int* ptr);
+        
+        void operator()() const;
+    };
+    std::thread m_cameraThread;
+
+public:
+    afx_msg void OnBnClickedButtonSaveImages();
 };
